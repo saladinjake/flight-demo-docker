@@ -1,28 +1,40 @@
 {
-  "name": "backend",
+  "name": "flyingo-backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Backend for Flyingo Travel Agency",
+  "main": "src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "mocha src/tests/**/*.test.js --exit",
+    "lint": "eslint src/**/*.js"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.js": [
+      "eslint --fix"
+    ]
   },
   "keywords": [],
-  "author": "",
+  "author": "saladinjake",
   "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "mongoose": "^9.5.0",
-    "morgan": "^1.10.1"
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.12.3",
+    "morgan": "^1.10.0"
   },
   "devDependencies": {
-    "chai": "^6.2.2",
-    "eslint": "^10.2.1",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.4.0",
-    "mocha": "^11.7.5",
-    "nodemon": "^3.1.14"
+    "chai": "^4.3.4",
+    "eslint": "^7.23.0",
+    "husky": "^4.3.8",
+    "lint-staged": "^10.5.4",
+    "mocha": "^8.3.2",
+    "nodemon": "^2.0.7"
   }
 }
