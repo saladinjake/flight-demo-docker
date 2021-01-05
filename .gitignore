@@ -1,7 +1,23 @@
+# Dependencies
 node_modules/
-.DS_Store
-commit.sh
-.env
-dist/
+frontend/node_modules/
+backend/node_modules/
+
+# Build
 build/
+dist/
+
+# Env
+.env
+backend/.env
+frontend/.env
+
+# Logs
 *.log
+npm-debug.log*
+
+# OS
+.DS_Store
+
+# Tools
+commit.sh
