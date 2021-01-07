@@ -3,7 +3,14 @@ const cors = require('cors');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
 
+const connectDB = require('./config/db');
+
 dotenv.config();
+
+// Connect to database
+connectDB();
+
+const flightRoutes = require('./routes/flightRoutes');
 
 const app = express();
 
@@ -11,6 +18,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
+
+// Mount Routers
+app.use('/api/flights', flightRoutes);
 
 // Basic Route
 app.get('/api/health', (req, res) => {
