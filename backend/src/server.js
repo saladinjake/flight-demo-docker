@@ -11,6 +11,8 @@ dotenv.config();
 connectDB();
 
 const flightRoutes = require('./routes/flightRoutes');
+const bookingRoutes = require('./routes/bookingRoutes');
+const errorHandler = require('./middleware/error');
 
 const app = express();
 
@@ -21,6 +23,10 @@ app.use(morgan('dev'));
 
 // Mount Routers
 app.use('/api/flights', flightRoutes);
+app.use('/api/bookings', bookingRoutes);
+
+// Error Handler
+app.use(errorHandler);
 
 // Basic Route
 app.get('/api/health', (req, res) => {
