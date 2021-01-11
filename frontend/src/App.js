@@ -1,27 +1,46 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
-const FlyingoApp = () => {
-  const [loading, setLoading] = useState(true);
+const Navbar = () => (
+  <nav>
+    <h1>Flyingo</h1>
+    <ul>
+      <li>Flights</li>
+      <li>My Bookings</li>
+    </ul>
+  </nav>
+);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1000);
-    return () => clearTimeout(timer);
-  }, []);
+const Hero = () => (
+  <section>
+    <h2>Find Your Next Adventure</h2>
+    <p>Search flights to destinations around the world.</p>
+  </section>
+);
 
-  if (loading) {
-    return (
-      <div className="loading-screen">
-        <div className="loader"></div>
-      </div>
-    );
-  }
+const SearchBar = () => (
+  <div>
+    <input type="text" placeholder="From" />
+    <input type="text" placeholder="To" />
+    <button>Search</button>
+  </div>
+);
 
+const FlightList = () => (
+  <div>
+    <h3>Available Flights</h3>
+    <p>Loading flights...</p>
+  </div>
+);
+
+const App = () => {
   return (
-    <div >
-
-
+    <div>
+      <Navbar />
+      <Hero />
+      <SearchBar />
+      <FlightList />
     </div>
   );
 };
 
-export default FlyingoApp;
+export default App;
