@@ -1,44 +1,155 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Container, Row, Col, Card, CardBody, Button, Input, Navbar as RSNavbar, NavbarBrand, Nav, NavItem, NavLink } from 'reactstrap';
 
-const Navbar = () => (
-  <nav>
-    <h1>Flyingo</h1>
-    <ul>
-      <li>Flights</li>
-      <li>My Bookings</li>
-    </ul>
-  </nav>
+const NavbarComponent = () => (
+  <RSNavbar light expand="md" className="navbar sticky-top">
+    <Container>
+      <NavbarBrand href="/" className="font-weight-bold text-primary" style={{ fontSize: '1.5rem' }}>
+        Flyingo
+      </NavbarBrand>
+      <Nav className="ml-auto" navbar>
+        <NavItem>
+          <NavLink href="/flights">Flights</NavLink>
+        </NavItem>
+        <NavItem>
+          <NavLink href="/bookings">My Bookings</NavLink>
+        </NavItem>
+      </Nav>
+    </Container>
+  </RSNavbar>
 );
 
 const Hero = () => (
-  <section>
-    <h2>Find Your Next Adventure</h2>
-    <p>Search flights to destinations around the world.</p>
+  <section className="hero-section">
+    <Container>
+      <h1 className="display-4 font-weight-bold mb-4">Find Your Next Adventure</h1>
+      <p className="lead mb-0">Discover the world with Flyingo's seamless flight booking experience.</p>
+    </Container>
   </section>
 );
 
-const SearchBar = () => (
-  <div>
-    <input type="text" placeholder="From" />
-    <input type="text" placeholder="To" />
-    <button>Search</button>
-  </div>
-);
+const SearchBar = ({ onSearch }) => {
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
 
-const FlightList = () => (
-  <div>
-    <h3>Available Flights</h3>
-    <p>Loading flights...</p>
-  </div>
+  return (
+    <Container className="search-container">
+      <Row className="align-items-end">
+        <Col md={5} className="mb-3 mb-md-0">
+          <label className="text-muted small font-weight-bold">DEPART FROM</label>
+          <Input 
+            type="text" 
+            placeholder="City or Airport" 
+            value={from} 
+            onChange={(e) => setFrom(e.target.value)}
+            className="border-0 bg-light"
+            style={{ borderRadius: '0.75rem', height: '3.5rem' }}
+          />
+        </Col>
+        <Col md={5} className="mb-3 mb-md-0">
+          <label className="text-muted small font-weight-bold">DESTINATION</label>
+          <Input 
+            type="text" 
+            placeholder="Where to?" 
+            value={to} 
+            onChange={(e) => setTo(e.target.value)}
+            className="border-0 bg-light"
+            style={{ borderRadius: '0.75rem', height: '3.5rem' }}
+          />
+        </Col>
+        <Col md={2}>
+          <Button color="primary" block className="h-100" style={{ height: '3.5rem', borderRadius: '0.75rem' }} onClick={() => onSearch({ from, to })}>
+            Search
+          </Button>
+        </Col>
+      </Row>
+    </Container>
+  );
+};
+
+const FlightCard = ({ flight }) => (
+  <Card className="flight-card mb-4 border-0">
+    <CardBody className="p-4">
+      <Row className="align-items-center">
+        <Col md={3}>
+          <h5 className="mb-1 font-weight-bold">{flight.airline}</h5>
+          <span className="text-muted small">{flight.flightNumber}</span>
+        </Col>
+        <Col md={6}>
+          <Row className="text-center align-items-center">
+            <Col>
+              <h4 className="mb-0 font-weight-bold">{new Date(flight.departure.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</h4>
+              <div className="text-muted small">{flight.departure.city} ({flight.departure.airport})</div>
+            </Col>
+            <Col xs="auto">
+              <div className="text-primary" style={{ fontSize: '1.2rem' }}>✈</div>
+              <div style={{ borderTop: '2px dashed #e2e8f0', width: '50px', margin: '0 auto' }}></div>
+            </Col>
+            <Col>
+              <h4 className="mb-0 font-weight-bold">{new Date(flight.arrival.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</h4>
+              <div className="text-muted small">{flight.arrival.city} ({flight.arrival.airport})</div>
+            </Col>
+          </Row>
+        </Col>
+        <Col md={3} className="text-md-right mt-3 mt-md-0">
+          <h3 className="text-primary font-weight-bold mb-2">${flight.price}</h3>
+          <Button color="primary" outline size="sm" style={{ borderRadius: '0.5rem' }}>Book Now</Button>
+        </Col>
+      </Row>
+    </CardBody>
+  </Card>
 );
 
 const App = () => {
+  const [flights, setFlights] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/flights')
+      .then(res => res.json())
+      .then(json => {
+        if (json.success) setFlights(json.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  const handleSearch = (query) => {
+    // Filter locally for now, or could call API with params
+    console.log('Searching for:', query);
+  };
+
   return (
-    <div>
-      <Navbar />
+    <div className="pb-5">
+      <NavbarComponent />
       <Hero />
-      <SearchBar />
-      <FlightList />
+      <SearchBar onSearch={handleSearch} />
+      
+      <Container className="mt-5 pt-4">
+        <h3 className="mb-4 font-weight-bold">Available Flights</h3>
+        {loading ? (
+          <div className="text-center py-5">
+            <div className="spinner-border text-primary" role="status">
+              <span className="sr-only">Loading...</span>
+            </div>
+          </div>
+        ) : (
+          <Row>
+            <Col lg={10} className="mx-auto">
+              {flights.length > 0 ? (
+                flights.map(flight => <FlightCard key={flight._id} flight={flight} />)
+              ) : (
+                <div className="text-center py-5 text-muted">
+                  No flights found. Please try another search.
+                </div>
+              )}
+            </Col>
+          </Row>
+        )}
+      </Container>
     </div>
   );
 };
