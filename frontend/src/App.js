@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, CardBody, Button, Input, Navbar as RSNavbar, NavbarBrand, Nav, NavItem, NavLink } from 'reactstrap';
+import { Container, Row, Col, Card, CardBody, Button, Input, Navbar as RSNavbar, NavbarBrand, Nav, NavItem, NavLink, Modal, ModalHeader, ModalBody, ModalFooter, FormGroup, Label } from 'reactstrap';
 
 const NavbarComponent = () => (
   <RSNavbar light expand="md" className="navbar sticky-top">
@@ -67,7 +67,7 @@ const SearchBar = ({ onSearch }) => {
   );
 };
 
-const FlightCard = ({ flight }) => (
+const FlightCard = ({ flight, onBook }) => (
   <Card className="flight-card mb-4 border-0">
     <CardBody className="p-4">
       <Row className="align-items-center">
@@ -93,7 +93,7 @@ const FlightCard = ({ flight }) => (
         </Col>
         <Col md={3} className="text-md-right mt-3 mt-md-0">
           <h3 className="text-primary font-weight-bold mb-2">${flight.price}</h3>
-          <Button color="primary" outline size="sm" style={{ borderRadius: '0.5rem' }}>Book Now</Button>
+          <Button color="primary" outline size="sm" style={{ borderRadius: '0.5rem' }} onClick={() => onBook(flight)}>Book Now</Button>
         </Col>
       </Row>
     </CardBody>
@@ -103,6 +103,11 @@ const FlightCard = ({ flight }) => (
 const App = () => {
   const [flights, setFlights] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedFlight, setSelectedFlight] = useState(null);
+  const [modal, setModal] = useState(false);
+  const [bookingName, setBookingName] = useState('');
+
+  const toggleModal = () => setModal(!modal);
 
   useEffect(() => {
     fetch('/api/flights')
@@ -117,16 +122,35 @@ const App = () => {
       });
   }, []);
 
-  const handleSearch = (query) => {
-    // Filter locally for now, or could call API with params
-    console.log('Searching for:', query);
+  const handleBook = (flight) => {
+    setSelectedFlight(flight);
+    toggleModal();
+  };
+
+  const confirmBooking = () => {
+    fetch('/api/bookings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        flightId: selectedFlight._id,
+        userId: '600a0a0a0a0a0a0a0a0a0a0a', // Mock User ID
+        seatNumber: '12A'
+      })
+    })
+    .then(res => res.json())
+    .then(json => {
+      if (json.success) {
+        alert('Booking confirmed!');
+        toggleModal();
+      }
+    });
   };
 
   return (
     <div className="pb-5">
       <NavbarComponent />
       <Hero />
-      <SearchBar onSearch={handleSearch} />
+      <SearchBar onSearch={(q) => console.log(q)} />
       
       <Container className="mt-5 pt-4">
         <h3 className="mb-4 font-weight-bold">Available Flights</h3>
@@ -139,17 +163,37 @@ const App = () => {
         ) : (
           <Row>
             <Col lg={10} className="mx-auto">
-              {flights.length > 0 ? (
-                flights.map(flight => <FlightCard key={flight._id} flight={flight} />)
-              ) : (
-                <div className="text-center py-5 text-muted">
-                  No flights found. Please try another search.
-                </div>
-              )}
+              {flights.map(flight => <FlightCard key={flight._id} flight={flight} onBook={handleBook} />)}
             </Col>
           </Row>
         )}
       </Container>
+
+      <Modal isOpen={modal} toggle={toggleModal} centered>
+        <ModalHeader toggle={toggleModal} className="border-0 pb-0">Confirm Booking</ModalHeader>
+        <ModalBody>
+          {selectedFlight && (
+            <div>
+              <p>You are booking <strong>{selectedFlight.airline} {selectedFlight.flightNumber}</strong></p>
+              <p className="text-muted small">From {selectedFlight.departure.city} to {selectedFlight.arrival.city}</p>
+              <FormGroup>
+                <Label for="passengerName">Passenger Name</Label>
+                <Input 
+                  type="text" 
+                  id="passengerName" 
+                  value={bookingName} 
+                  onChange={(e) => setBookingName(e.target.value)} 
+                  placeholder="Enter full name"
+                />
+              </FormGroup>
+            </div>
+          )}
+        </ModalBody>
+        <ModalFooter className="border-0 pt-0">
+          <Button color="secondary" outline onClick={toggleModal}>Cancel</Button>
+          <Button color="primary" onClick={confirmBooking}>Confirm Booking</Button>
+        </ModalFooter>
+      </Modal>
     </div>
   );
 };
