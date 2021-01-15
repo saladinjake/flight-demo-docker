@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { Container, Row, Col, Card, CardBody, Button, Input, Navbar as RSNavbar, NavbarBrand, Nav, NavItem, NavLink, Modal, ModalHeader, ModalBody, ModalFooter, FormGroup, Label } from 'reactstrap';
 
 const NavbarComponent = () => (
@@ -9,7 +10,7 @@ const NavbarComponent = () => (
       </NavbarBrand>
       <Nav className="ml-auto" navbar>
         <NavItem>
-          <NavLink href="/flights">Flights</NavLink>
+          <NavLink href="/">Flights</NavLink>
         </NavItem>
         <NavItem>
           <NavLink href="/bookings">My Bookings</NavLink>
@@ -100,7 +101,7 @@ const FlightCard = ({ flight, onBook }) => (
   </Card>
 );
 
-const App = () => {
+const FlightsPage = () => {
   const [flights, setFlights] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedFlight, setSelectedFlight] = useState(null);
@@ -147,11 +148,9 @@ const App = () => {
   };
 
   return (
-    <div className="pb-5">
-      <NavbarComponent />
+    <div>
       <Hero />
       <SearchBar onSearch={(q) => console.log(q)} />
-      
       <Container className="mt-5 pt-4">
         <h3 className="mb-4 font-weight-bold">Available Flights</h3>
         {loading ? (
@@ -195,6 +194,57 @@ const App = () => {
         </ModalFooter>
       </Modal>
     </div>
+  );
+};
+
+const BookingsPage = () => {
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/bookings')
+      .then(res => res.json())
+      .then(json => {
+        if (json.success) setBookings(json.data);
+        setLoading(false);
+      });
+  }, []);
+
+  return (
+    <Container className="mt-5">
+      <h2 className="mb-4 font-weight-bold">My Bookings</h2>
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <Row>
+          {bookings.map(booking => (
+            <Col md={6} key={booking._id}>
+              <Card className="mb-4 border-0 shadow-sm" style={{ borderRadius: '1rem' }}>
+                <CardBody>
+                  <h5 className="font-weight-bold text-primary">{booking.flight.airline}</h5>
+                  <p className="mb-1"><strong>{booking.flight.departure.city} → {booking.flight.arrival.city}</strong></p>
+                  <p className="text-muted small mb-0">Seat: {booking.seatNumber} | Status: <span className="text-success">{booking.status}</span></p>
+                </CardBody>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      )}
+    </Container>
+  );
+};
+
+const App = () => {
+  return (
+    <Router>
+      <div className="pb-5">
+        <NavbarComponent />
+        <Switch>
+          <Route exact path="/" component={FlightsPage} />
+          <Route path="/bookings" component={BookingsPage} />
+        </Switch>
+      </div>
+    </Router>
   );
 };
 
