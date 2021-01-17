@@ -21,6 +21,8 @@ services:
     container_name: flyingo_ui
     ports:
       - "3101:3000"
+    environment:
+      - WDS_SOCKET_PORT=3101
     stdin_open: true
     tty: true
     depends_on:
