@@ -21,3 +21,5 @@ To destroy the sample data:
 ```bash
 docker exec flyingo_api npm run seed:destroy
 ```
+
+Last updated: 2026-05-01
